@@ -85,7 +85,7 @@ function pushGasStationsForLocation(body) {
 api.get('/city/{name}/cheapestgas', function(req) {
     'use strict';
     const cityName = req.pathParams.name;
-    const fuelType = request.queryString.type;
+    const fuelType = req.queryString.type;
     const sortedUrl = url + "index.php?kaupunki=" + cityName + "&sort=" + fuelType;
     const options = {
         uri: sortedUrl,
@@ -122,7 +122,9 @@ function pushCheapestStationForLocation(body) {
                 "ninetyEight" : values[3],
                 "diesel" : values[4]
             };
+            return false;
         }
+        return 0;
     });
     return {station : station};
 }
