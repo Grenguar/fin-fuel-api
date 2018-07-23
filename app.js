@@ -4,6 +4,7 @@ let ApiBuilder = require('claudia-api-builder'),
     request = require('request-promise');
 const url = 'https://www.polttoaine.net/';
 
+
 module.exports = api;
 
 api.get('/cities', function () {
@@ -74,9 +75,54 @@ function pushGasStationsForLocation(body) {
                 "ninetyFive" : values[2],
                 "ninetyEight" : values[3],
                 "diesel" : values[4]
-            }
+            };
             prices.push(jsonObj);
         }
     });
     return {stations : prices};
+}
+
+api.get('/city/{name}/cheapestgas', function(req) {
+    'use strict';
+    const cityName = req.pathParams.name;
+    const fuelType = request.queryString.type;
+    const sortedUrl = url + "index.php?kaupunki=" + cityName + "&sort=" + fuelType;
+    const options = {
+        uri: sortedUrl,
+        json: true
+    };
+    return new Promise(function(resolve, reject){
+        request(options, function (err, response, body) {
+            if (err) return reject(err);
+            resolve(pushCheapestStationForLocation(body));
+        });
+    });
+},{
+    success: { contentType: 'application/json' },
+    error: {code: 500}
+});
+
+function pushCheapestStationForLocation(body) {
+    $ = cheerio.load(body);
+    let station = [];
+    const priceTable = $('#Hinnat').find('.e10');
+    const rows = priceTable.find('> tbody > tr');
+    const regExpString = /[\w-]*E10[\w-]*/g;
+    const yearNow = new Date().getFullYear();
+    rows.each(function() {
+        if ($(this).attr('class').match(regExpString)) {
+            let values = [];
+            $(this).find('td').each(function() {
+                values.push($(this).text())
+            });
+            station = {
+                "station" : values[0].replace(/[^\x20-\x7E]+/g, ''),
+                "lastModified" : values[1] + yearNow,
+                "ninetyFive" : values[2],
+                "ninetyEight" : values[3],
+                "diesel" : values[4]
+            };
+        }
+    });
+    return {station : station};
 }
