@@ -2,4 +2,4 @@
 It is an api for Finnish gas stations price data
 
 Written in NodeJS.
-Using AWS Lambda with ClaudiaJS framework
+Using AWS Lambda, API Gateway with ClaudiaJS deployment tool.
