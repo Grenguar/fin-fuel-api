@@ -21,7 +21,7 @@ api.get('/cities', function () {
     });
 },{
     success: { contentType: 'application/json' },
-    error: {code: 500}
+    error: { code: 500 }
 });
 
 function pushCitiesFromUrl(body) {
@@ -94,7 +94,7 @@ api.get('/city/{name}/cheapestgas', function(req) {
     return new Promise(function(resolve, reject){
         request(options, function (err, response, body) {
             if (err) return reject(err);
-            resolve(pushCheapestStationForLocation(body));
+            resolve(pushCheapestStationForLocation(body, fuelType));
         });
     });
 },{
@@ -102,7 +102,7 @@ api.get('/city/{name}/cheapestgas', function(req) {
     error: {code: 500}
 });
 
-function pushCheapestStationForLocation(body) {
+function pushCheapestStationForLocation(body, fuelType) {
     $ = cheerio.load(body);
     let station = [];
     const priceTable = $('#Hinnat').find('.e10');
@@ -115,16 +115,30 @@ function pushCheapestStationForLocation(body) {
             $(this).find('td').each(function() {
                 values.push($(this).text())
             });
+            let priceValue = getPriceFromParsedData(fuelType, values);
             station = {
                 "station" : values[0].replace(/[^\x20-\x7E]+/g, ''),
                 "lastModified" : values[1] + yearNow,
-                "ninetyFive" : values[2],
-                "ninetyEight" : values[3],
-                "diesel" : values[4]
+                "fuelType" : fuelType,
+                "price" : priceValue
             };
             return false;
         }
         return 0;
     });
     return {station : station};
+}
+
+function getPriceFromParsedData(type, parsedValues)
+{
+    if (type == "95") {
+        return parsedValues[2];
+    } else if (type == "98") {
+        return parsedValues[3];
+    } else if (type == "Di") {
+        return parsedValues[4];
+    } else {
+        return "not present"
+    }
+    return "not present";
 }
