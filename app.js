@@ -7,6 +7,12 @@ const url = 'https://www.polttoaine.net/';
 
 module.exports = api;
 
+
+/**
+ *
+ * REST GET Get all available cities
+ *
+ **/
 api.get('/cities', function () {
     'use strict';
     const options = {
@@ -37,6 +43,11 @@ function pushCitiesFromUrl(body) {
     return {locations : citiesList};
 }
 
+/**
+ *
+ * REST GET City by name
+ *
+**/
 api.get('/city/{name}', function (req) {
     'use strict';
     const cityName = req.pathParams.name;
@@ -59,10 +70,13 @@ api.get('/city/{name}', function (req) {
 function pushGasStationsForLocation(body) {
     $ = cheerio.load(body);
     let prices = [];
+    let coords = getCoordinates(body);
     const priceTable = $('#Hinnat').find('.e10');
     const rows = priceTable.find('> tbody > tr');
     const regExpString = /[\w-]*E10[\w-]*/g;
     const yearNow = new Date().getFullYear();
+    //link for the map site
+    let additionalUrl = rows.find('> td > a').attr('href');
     rows.each(function() {
         if ($(this).attr('class').match(regExpString)) {
             let values = [];
@@ -80,6 +94,11 @@ function pushGasStationsForLocation(body) {
         }
     });
     return {stations : prices};
+}
+
+function getCoordinates(body) {
+
+    return [];
 }
 
 api.get('/city/{name}/cheapestgas', function(req) {
@@ -129,13 +148,12 @@ function pushCheapestStationForLocation(body, fuelType) {
     return {station : station};
 }
 
-function getPriceFromParsedData(type, parsedValues)
-{
-    if (type == "95") {
+function getPriceFromParsedData(type, parsedValues) {
+    if (type === "95") {
         return parsedValues[2];
-    } else if (type == "98") {
+    } else if (type === "98") {
         return parsedValues[3];
-    } else if (type == "Di") {
+    } else if (type === "Di") {
         return parsedValues[4];
     } else {
         return "not present"
