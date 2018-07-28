@@ -1,12 +1,13 @@
+require('dotenv').load();
 let ApiBuilder = require('claudia-api-builder'),
     api = new ApiBuilder(),
     cheerio = require('cheerio'),
     request = require('request-promise');
-const url = 'https://www.polttoaine.net/';
 
+const url = 'https://www.polttoaine.net/';
+const token = process.env.MAP_TOKEN;
 
 module.exports = api;
-
 
 /**
  *
@@ -76,13 +77,16 @@ function pushGasStationsForLocation(body) {
     const regExpString = /[\w-]*E10[\w-]*/g;
     const yearNow = new Date().getFullYear();
     //link for the map site
-    let additionalUrl = rows.find('> td > a').attr('href');
+    // let additionalUrl = rows.find('> td > a').attr('href');
     rows.each(function() {
         if ($(this).attr('class').match(regExpString)) {
             let values = [];
             $(this).find('td').each (function() {
                 values.push($(this).text())
             });
+
+            let address = values[0].split(", ")[1];
+
             let jsonObj = {
                 "station" : values[0].replace(/[^\x20-\x7E]+/g, ''),
                 "lastModified" : values[1] + yearNow,
@@ -96,9 +100,31 @@ function pushGasStationsForLocation(body) {
     return {stations : prices};
 }
 
-function getCoordinates(body) {
+function getAddresses(prices) {
+    let addresses = [];
+    for (var key in prices.stations) {
+        if (prices.stations.hasOwnProperty(key)) {
+            addresses.push(prices.stations[key].station);
+        }
+    }
+    console.log(addresses);
+    return addresses;
+}
 
+function filterStationAddress(string) {
+    return string.split(', ')[1]
+        .replace(/\(.*\)/g, '')
+        .replace(/\[.*\]/g, '');
+}
+
+function getCoordinates(body) {
     return [];
+}
+
+function createGeoCodingQuery(token, searchPhrase) {
+    return "https://eu1.locationiq.org/v1/search.php?key="
+        + token + "&q=" + searchPhrase.replace(" ", "%20")
+        + "&format=json";
 }
 
 api.get('/city/{name}/cheapestgas', function(req) {
