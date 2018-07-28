@@ -104,7 +104,7 @@ function getAddresses(prices) {
     let addresses = [];
     for (var key in prices.stations) {
         if (prices.stations.hasOwnProperty(key)) {
-            addresses.push(prices.stations[key].station);
+            addresses.push(filterStationAddress(prices.stations[key].station));
         }
     }
     console.log(addresses);
