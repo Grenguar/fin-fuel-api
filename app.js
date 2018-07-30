@@ -136,11 +136,13 @@ api.get('/city/{name}/cheapestgas', function(req) {
     const sortedUrl = url + "index.php?kaupunki=" + cityName + "&sort=" + fuelType;
     const options = {
         uri: sortedUrl,
-        json: true
+        json: true,
+        encoding: 'latin1'
     };
     return new Promise(function(resolve, reject){
         request(options, function (err, response, body) {
             if (err) return reject(err);
+            body = iconv.decode(body, 'ISO-8859-1');
             resolve(pushCheapestStationForLocation(body, fuelType));
         });
     });
