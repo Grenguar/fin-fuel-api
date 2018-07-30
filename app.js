@@ -2,7 +2,8 @@ require('dotenv').load();
 let ApiBuilder = require('claudia-api-builder'),
     api = new ApiBuilder(),
     cheerio = require('cheerio'),
-    request = require('request-promise');
+    request = require('request-promise'),
+    iconv = require('iconv-lite');
 
 const url = 'https://www.polttoaine.net/';
 const token = process.env.MAP_TOKEN;
@@ -18,7 +19,8 @@ api.get('/cities', function () {
     'use strict';
     const options = {
         uri: url,
-        json: true
+        json: true,
+        encoding: 'latin1'
     };
     return new Promise(function(resolve, reject){
         request(options, function (err, response, body) {
@@ -55,11 +57,13 @@ api.get('/city/{name}', function (req) {
     const cityUrl = url + cityName;
     const options = {
         uri: cityUrl,
-        json: true
+        json: true,
+        encoding: 'latin1'
     };
     return new Promise(function(resolve, reject){
         request(options, function (err, response, body) {
             if (err) return reject(err);
+            body = iconv.decode(body, 'ISO-8859-1');
             resolve(pushGasStationsForLocation(body));
         });
     });
@@ -84,11 +88,9 @@ function pushGasStationsForLocation(body) {
             $(this).find('td').each (function() {
                 values.push($(this).text())
             });
-
             let address = values[0].split(", ")[1];
-
             let jsonObj = {
-                "station" : values[0].replace(/[^\x20-\x7E]+/g, ''),
+                "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
                 "lastModified" : values[1] + yearNow,
                 "ninetyFive" : values[2],
                 "ninetyEight" : values[3],
@@ -162,7 +164,7 @@ function pushCheapestStationForLocation(body, fuelType) {
             });
             let priceValue = getPriceFromParsedData(fuelType, values);
             station = {
-                "station" : values[0].replace(/[^\x20-\x7E]+/g, ''),
+                "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
                 "lastModified" : values[1] + yearNow,
                 "fuelType" : fuelType,
                 "price" : priceValue
