@@ -109,7 +109,6 @@ function getAddresses(prices) {
             addresses.push(filterStationAddress(prices.stations[key].station));
         }
     }
-    console.log(addresses);
     return addresses;
 }
 
@@ -119,14 +118,43 @@ function filterStationAddress(string) {
         .replace(/\[.*\]/g, '');
 }
 
-function getCoordinates(body) {
-    return [];
+function getCoordinates(addresses) {
+    let coordinates = [];
+    for (var i = 0, len = addresses.length; i < len; i++) {
+      let geoUrl = createGeoCodingQuery(token, addresses[i]);
+      let result = new Promise(function(resolve, reject){
+          request({
+            method: "GET",
+            uri: geoUrl,
+            json: true,
+            resolveWithFullResponse : true,
+            encoding: 'latin1'
+          }, function (err, response, body) {
+              if (err) return reject(err);
+              setTimeout(function() {
+                resolve(parseGeoResponse(body));
+              }, 2000);
+  
+          });
+      })
+      console.log(result);
+      coordinates.push(result);
+  
+    }
 }
 
 function createGeoCodingQuery(token, searchPhrase) {
     return "https://eu1.locationiq.org/v1/search.php?key="
         + token + "&q=" + searchPhrase.replace(" ", "%20")
         + "&format=json";
+}
+  
+function parseGeoResponse(body) {
+    // return {
+    //   "lat" : body[0].lat,
+    //   "lon" : body[0].lon
+    // };
+    return body;
 }
 
 api.get('/city/{name}/cheapestgas', function(req) {
