@@ -118,14 +118,35 @@ function filterStationAddress(string) {
         .replace(/\[.*\]/g, '');
 }
 
-function getCoordinatesFromScript(body) {
+function getBodyWithCoordinates(urlEnding) {
+    if (urlEnding === "-") {
+      return [];
+    }
+    return new Promise(function(resolve, reject){
+      request({
+        method: "GET",
+        uri: url + urlEnding,
+        json: true    
+      }, function (err, response, body) {
+          if (err) return reject(err);
+          resolve(getCoordinatesFromScript(body));
+      });
+    });
+  }
+  
+  function getCoordinatesFromScript(body) {
     $ = cheerio.load(body);
-    let coords = '';
+    let coordsArray = [];
     $('.centerCol').each(function() {
       let obj = $(this).find("script").attr("type","text/javascript");
       let scriptText = obj[3].children[0].data;
+      coordsArray = scriptText.split(/google.maps.LatLng/)[1]
+                              .match(/\(([^)]+)\)/)[1]
+                              .split(", ");
     });
-}
+    console.log(coordsArray);
+    return coordsArray;
+  }
 
 api.get('/city/{name}/cheapestgas', function(req) {
     'use strict';
