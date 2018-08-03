@@ -48,7 +48,7 @@ function pushCitiesFromUrl(body) {
 
 /**
  *
- * REST GET City by name
+ * REST GET Stations of the chosen city by name
  *
 **/
 api.get('/city/{name}', function (req) {
@@ -89,6 +89,7 @@ function pushGasStationsForLocation(body) {
                 values.push($(this).text())
             });
             let address = values[0].split(", ")[1];
+            let coordSite = $(this).find('> td > a').attr('href');
             let jsonObj = {
                 "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
                 "lastModified" : values[1] + yearNow,
@@ -146,6 +147,15 @@ function getBodyWithCoordinates(urlEnding) {
     });
     console.log(coordsArray);
     return coordsArray;
+  }
+
+  function setCoordsForPrices(prices, coordsArray) {
+    for (var key in prices.stations) {
+        if (prices.stations.hasOwnProperty(key)) {
+            prices.stations[key].lat = coordsArray[0];
+            prices.stations[key].lon = coordsArray[1];
+        }
+    }
   }
 
 api.get('/city/{name}/cheapestgas', function(req) {
