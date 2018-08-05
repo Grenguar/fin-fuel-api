@@ -60,11 +60,17 @@ api.get('/city/{name}', function (req) {
         json: true,
         encoding: 'latin1'
     };
-    return new Promise(function(resolve, reject){
+    let prices = new Promise(function(resolve, reject){
         request(options, function (err, response, body) {
             if (err) return reject(err);
             body = iconv.decode(body, 'ISO-8859-1');
             resolve(pushGasStationsForLocation(body));
+        });
+    });
+    return prices.then(function(prices) {
+        return createNewPricesArray(prices).then(function() {
+          console.log(prices);
+          return prices;
         });
     });
 },{
@@ -101,6 +107,67 @@ function pushGasStationsForLocation(body) {
         }
     });
     return {stations : prices};
+}
+
+function createNewPricesArray(prices) {
+    let ids = getIdsFromPrices(prices);
+    let newPricesArray = [];
+    for(var i = 0; i < ids.length; i++) {
+      newPricesArray.push(getCoordinatesWithStationId(ids[i], prices));
+    }
+    return Promise.all(newPricesArray);
+}
+
+function getIdsFromPrices(prices) {
+    let ids = [];
+    for (let key in prices.stations) {
+      if (prices.stations.hasOwnProperty(key)) {
+        let url = prices.stations[key].id;
+          ids.push(url);
+      }
+    }
+  return ids;
+}
+  
+function getCoordinatesWithStationId(id, prices) {
+    if (id === "-") {
+        return [];
+    }
+    return new Promise(function(resolve, reject){
+        request({
+        method: "GET",
+        uri: url + "/index.php?cmd=map&id=" + id,
+        json: true    
+        }, function (err, response, body) {
+            if (err) return reject(err);
+            resolve(putCoordsToPricesArray(body, id, prices));
+        });
+    });
+}
+  
+function putCoordsToPricesArray(body, id, prices) {
+    $ = cheerio.load(body);
+    let coordsArray = [];
+    $('.centerCol').each(function() {
+    let obj = $(this).find("script").attr("type","text/javascript");
+    let scriptText = obj[3].children[0].data;
+    coordsArray = scriptText.split(/google.maps.LatLng/)[1]
+                            .match(/\(([^)]+)\)/)[1]
+                            .split(", ");
+    });
+    setCoordsForPrices(prices, coordsArray);
+    return prices;
+}
+  
+function setCoordsForPrices(prices, coordsArray) {
+    for (var key in prices.stations) {
+      if (prices.stations.hasOwnProperty(key)) {
+        if (prices.stations[key].id !== "-") {
+          prices.stations[key].lat = coordsArray[0];
+          prices.stations[key].lon = coordsArray[1];
+        }
+      }
+    }
 }
 
 api.get('/city/{name}/cheapestgas', function(req) {
