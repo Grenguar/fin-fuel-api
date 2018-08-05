@@ -1,4 +1,3 @@
-// require('dotenv').load();
 let ApiBuilder = require('claudia-api-builder'),
     api = new ApiBuilder(),
     cheerio = require('cheerio'),
@@ -6,7 +5,6 @@ let ApiBuilder = require('claudia-api-builder'),
     iconv = require('iconv-lite');
 
 const url = 'https://www.polttoaine.net/';
-// const token = process.env.MAP_TOKEN;
 
 module.exports = api;
 
@@ -69,7 +67,6 @@ api.get('/city/{name}', function (req) {
     });
     return prices.then(function(prices) {
         return createNewPricesArray(prices).then(function() {
-          console.log(prices);
           return prices;
         });
     });
