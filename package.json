@@ -12,6 +12,8 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "claudia-api-builder": "^4.1.1",
+    "dotenv": "^6.0.0",
+    "iconv-lite": "^0.4.23",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "request-promise-native": "^1.0.5"

@@ -62,7 +62,7 @@ api.get('/city/{name}', function (req) {
         request(options, function (err, response, body) {
             if (err) return reject(err);
             body = iconv.decode(body, 'ISO-8859-1');
-            resolve(pushGasStationsForLocation(body));
+            resolve(pullGasStationsForLocation(body));
         });
     });
     return prices.then(function(prices) {
@@ -75,7 +75,7 @@ api.get('/city/{name}', function (req) {
     error: {code: 500}
 });
 
-function pushGasStationsForLocation(body) {
+function pullGasStationsForLocation(body) {
     $ = cheerio.load(body);
     let prices = [];
     const priceTable = $('#Hinnat').find('.e10');
@@ -88,10 +88,8 @@ function pushGasStationsForLocation(body) {
             $(this).find('td').each (function() {
                 values.push($(this).text())
             });
-            let coordSite = $(this).find('> td > a').attr('href');
-            let stationId = typeof coordSite == "undefined" ? "-" : coordSite.split("id=")[1];
             let jsonObj = {
-                "id" : stationId,
+                "id" : getStationId($(this)),
                 "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
                 "lastModified" : values[1] + yearNow,
                 "ninetyFive" : values[2].replace("*", ""),
@@ -104,6 +102,11 @@ function pushGasStationsForLocation(body) {
         }
     });
     return {stations : prices};
+}
+
+function getStationId(tableRow) {
+    let coordSite = tableRow.find('> td > a').attr('href');
+    return typeof coordSite == "undefined" ? "-" : coordSite.split("id=")[1];
 }
 
 function createNewPricesArray(prices) {
@@ -130,7 +133,7 @@ function getCoordinatesWithStationId(id, prices) {
     if (id === "-") {
         return [];
     }
-    return new Promise(function(resolve, reject){
+    return new Promise(function(resolve, reject) {
         request({
         method: "GET",
         uri: url + "/index.php?cmd=map&id=" + id,
@@ -177,11 +180,20 @@ api.get('/city/{name}/cheapestgas', function(req) {
         json: true,
         encoding: 'latin1'
     };
-    return new Promise(function(resolve, reject){
+    let cheapestPrice = new Promise(function(resolve, reject){
         request(options, function (err, response, body) {
             if (err) return reject(err);
             body = iconv.decode(body, 'ISO-8859-1');
-            resolve(pushCheapestStationForLocation(body, fuelType));
+            resolve(pullCheapestStationForLocation(body, fuelType));
+        });
+    });
+    return cheapestPrice.then(function(price) {
+        let id = price.station.id;
+        if (id === "-") {
+            return price;
+        }
+        return getCoordinatesForCheapestStation(id, price).then(function() {
+            return price;
         });
     });
 },{
@@ -189,7 +201,7 @@ api.get('/city/{name}/cheapestgas', function(req) {
     error: {code: 500}
 });
 
-function pushCheapestStationForLocation(body, fuelType) {
+function pullCheapestStationForLocation(body, fuelType) {
     $ = cheerio.load(body);
     let station = [];
     const priceTable = $('#Hinnat').find('.e10');
@@ -202,18 +214,55 @@ function pushCheapestStationForLocation(body, fuelType) {
             $(this).find('td').each(function() {
                 values.push($(this).text())
             });
-            let priceValue = getPriceFromParsedData(fuelType, values);
             station = {
+                "id" : getStationId($(this)),
                 "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
                 "lastModified" : values[1] + yearNow,
                 "fuelType" : fuelType,
-                "price" : priceValue
+                "price" : getPriceFromParsedData(fuelType, values),
+                "lat" : "-",
+                "lon" : "-"
             };
             return false;
         }
         return 0;
     });
     return {station : station};
+}
+
+function getCoordinatesForCheapestStation(id, price) {
+    if (id === "-") {
+        return [];
+    }
+    return new Promise(function(resolve, reject){
+        request({
+        method: "GET",
+        uri: url + "/index.php?cmd=map&id=" + id,
+        json: true    
+        }, function (err, response, body) {
+            if (err) return reject(err);
+            resolve(putCoordsToCheapestPrice(body, price));
+        });
+    });
+}
+
+function putCoordsToCheapestPrice(body, price) {
+    $ = cheerio.load(body);
+    let coordsArray = [];
+    $('.centerCol').each(function() {
+    let obj = $(this).find("script").attr("type","text/javascript");
+    let scriptText = obj[3].children[0].data;
+    coordsArray = scriptText.split(/google.maps.LatLng/)[1]
+                            .match(/\(([^)]+)\)/)[1]
+                            .split(", ");
+    });
+    setCoordsForPrice(price, coordsArray);
+    return price;
+}
+
+function setCoordsForPrice(price, coordsArray) {
+    price.station.lat = coordsArray[0];
+    price.station.lon = coordsArray[1];
 }
 
 function getPriceFromParsedData(type, parsedValues) {
