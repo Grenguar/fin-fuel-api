@@ -133,7 +133,7 @@ function getCoordinatesWithStationId(id, prices) {
     if (id === "-") {
         return [];
     }
-    return new Promise(function(resolve, reject){
+    return new Promise(function(resolve, reject) {
         request({
         method: "GET",
         uri: url + "/index.php?cmd=map&id=" + id,
@@ -189,6 +189,9 @@ api.get('/city/{name}/cheapestgas', function(req) {
     });
     return cheapestPrice.then(function(price) {
         let id = price.station.id;
+        if (id === "-") {
+            return price;
+        }
         return getCoordinatesForCheapestStation(id, price).then(function() {
             return price;
         });
