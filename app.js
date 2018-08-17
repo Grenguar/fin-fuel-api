@@ -7,6 +7,26 @@ let ApiBuilder = require('claudia-api-builder'),
 
 const url = 'https://www.polttoaine.net/';
 
+function handleGetRequest(app, req) {
+    const body = {
+        status: 'OK',
+        body: req.body,
+        pathParams: req.pathParams,
+        query: req.queryString
+    };
+    return new app.ApiResponse(body, {
+        called: 'handleGetRequest'
+    }, 200);
+}
+
+function bootstrap() {
+    const app = new ApiBuilder();
+    app.get('/cities', handleGetRequest.bind(null, app));
+    app.get('/city/{name}', handleGetRequest.bind(null, app));
+    app.get('/city/{name}/cheapestgas', handleGetRequest.bind(null, app));
+    return app;
+}
+
 module.exports = api;
 
 /**
