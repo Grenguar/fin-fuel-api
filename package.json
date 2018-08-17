@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "claudia create --name fin-fuel-api --region eu-central-1 --api-module app",
-    "deploy": "claudia update"
+    "deploy": "claudia update",
+    "server": "claudia-local-api --api-module app.js"
   },
   "author": "Igor Soroka",
   "license": "ISC",
@@ -17,5 +18,8 @@
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "request-promise-native": "^1.0.5"
+  },
+  "devDependencies": {
+    "claudia-local-api": "^2.0.0"
   }
 }
