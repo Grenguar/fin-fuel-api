@@ -7,6 +7,11 @@ let ApiBuilder = require('claudia-api-builder'),
 
 const url = 'https://www.polttoaine.net/';
 
+/**
+ * Functions for local-api-builder. 
+ * This is for developing locally with 
+ * command: 'npm run server'
+ */
 function handleGetRequest(app, req) {
     const body = {
         status: 'OK',
