@@ -5,12 +5,14 @@ const testHtml: string = "<div><select name='kaupunki' onchange='javascript:kaup
 let exp = expect as jest.Expect;
 
 if (Utils) {
-    test('Utils is available as a named export from ../utils.ts', () => {
-        exp(Utils).toBeDefined();
-    });
-    
-    test('get city locations returns', () => {
-        let cityNames: CityLocations = Utils.getCityNames(testHtml);
-        exp(cityNames.locations).toHaveLength(14)
+    describe("Testing Utils class", () => {
+        test('Utils is available as a named export from ../utils.ts', () => {
+            exp(Utils).toBeDefined();
+        });
+        
+        test('get city locations returns correct number of elements', () => {
+            let cityNames: CityLocations = Utils.getCityNames(testHtml);
+            exp(cityNames.locations).toHaveLength(14)
+        })
     })
 }
