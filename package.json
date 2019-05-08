@@ -4,22 +4,44 @@
   "description": "Data about prices and location of gas stations in Finland",
   "main": "app.js",
   "scripts": {
-    "start": "claudia create --name fin-fuel-api --region eu-central-1 --api-module app",
+    "start": "claudia create --name fin-fuel-api --region eu-central-1 --api-module bin/app",
     "deploy": "claudia update",
-    "server": "claudia-local-api --api-module app.js"
+    "server": "claudia-local-api --api-module bin/app",
+    "update": "tsc && claudia update --api-module bin/app",
+    "create": "tsc && claudia create --api-module bin/app",
+    "pack": "tsc && claudia pack --api-module bin/app --force",
+    "reconfigure dev": "claudia update --version development",
+    "test": "npx jest --watch"
   },
   "author": "Igor Soroka",
   "license": "ISC",
   "dependencies": {
+    "@types/cheerio": "^0.22.11",
+    "@types/jquery": "^3.3.29",
+    "@types/request-promise": "^4.1.43",
     "cheerio": "^1.0.0-rc.2",
     "claudia-api-builder": "^4.1.1",
     "dotenv": "^6.0.0",
+    "events": "^3.0.0",
     "iconv-lite": "^0.4.23",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
-    "request-promise-native": "^1.0.5"
+    "request-promise-native": "^1.0.5",
+    "string_decoder": "^1.2.0",
+    "typescript": "^3.4.5"
   },
   "devDependencies": {
-    "claudia-local-api": "^2.0.0"
+    "@babel/core": "^7.4.4",
+    "@types/jest": "^24.0.12",
+    "@types/node": "^12.0.0",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^24.8.0",
+    "babel-loader": "^8.0.5",
+    "babel-preset-env": "^1.7.0",
+    "claudia-local-api": "^2.0.0",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.16.0",
+    "tslint-loader": "^3.5.4"
   }
 }

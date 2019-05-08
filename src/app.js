@@ -3,7 +3,7 @@ let ApiBuilder = require('claudia-api-builder'),
     cheerio = require('cheerio'),
     request = require('request-promise'),
     iconv = require('iconv-lite'),
-    utils = require("./src/utils");
+    utils = require("./utils");
 
 const url = 'https://www.polttoaine.net/';
 
