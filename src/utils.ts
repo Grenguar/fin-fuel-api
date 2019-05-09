@@ -2,6 +2,13 @@ import * as cheerio from 'cheerio';
 import * as request from 'request-promise';
 
 export class Utils {
+
+    url: string;
+
+    constructor(url: string) {
+        this.url = url;
+    }
+
     static getCityNames(body: string): CityLocations {
         let citiesList = [];
         const regExpString: RegExp = /[\w-]*Valitse[\w-]*/g;
@@ -14,6 +21,11 @@ export class Utils {
         });
         let cityLocations: CityLocations = {locations: citiesList}
         return cityLocations;
+    }
+
+    static getStationId(tableRow: Cheerio): string {
+        let coordSite = tableRow.find('> td > a').attr('href');
+        return typeof coordSite == "undefined" ? "-" : coordSite.split("id=")[1];
     }
     
     static getGasStationsForLocation(body: string): Stations {
@@ -29,8 +41,9 @@ export class Utils {
                 $(this).find('td').each (function() {
                     values.push($(this).text())
                 });
+                let stationId: string = this.getStationId($(this))
                 let gasPrice: GasPrice = {
-                    id: this.getStationId($(this)),
+                    id: stationId,
                     station: values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
                     lastModified: values[1] + yearNow,
                     ninetyFive: values[2].replace("*", ""),
@@ -46,10 +59,7 @@ export class Utils {
         return stations;
     }
 
-    static getStationId(tableRow: Cheerio): string {
-        let coordSite = tableRow.find('> td > a').attr('href');
-        return typeof coordSite == "undefined" ? "-" : coordSite.split("id=")[1];
-    }
+
 
 }
 

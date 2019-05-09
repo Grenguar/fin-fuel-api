@@ -11,6 +11,6 @@ module.exports = {
     "^.+\\.tsx?$": "ts-jest"
   },
   testURL: "http://localhost",
-  testMatch: ["**/tests/*.(ts|tsx|js|jsx)"],
+  testMatch: ["**/tests/*test*.(ts|tsx|js|jsx)"],
   moduleDirectories: ["node_modules", "bower_components"]
 };
