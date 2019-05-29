@@ -1,0 +1,8 @@
+language: node_js
+cache: npm
+node_js:
+  - 10
+  - node
+before_script:
+  - echo starting build
+script: npm test
