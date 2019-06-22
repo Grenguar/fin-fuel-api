@@ -27,35 +27,6 @@ export class Parser {
         let coordSite = tableRow.find('> td > a').attr('href');
         return typeof coordSite == "undefined" ? "-" : coordSite.split("id=")[1];
     }
-
-    // function getGasStationsForLocation(body) {
-    //     $ = cheerio.load(body);
-    //     let prices = [];
-    //     const priceTable = $('#Hinnat').find('.e10');
-    //     const rows = priceTable.find('> tbody > tr');
-    //     const regExpString = /[\w-]*E10[\w-]*/g;
-    //     const yearNow = new Date().getFullYear();
-    //     rows.each(function() {
-    //         if ($(this).attr('class').match(regExpString)) {
-    //             let values = [];
-    //             $(this).find('td').each (function() {
-    //                 values.push($(this).text())
-    //             });
-    //             let jsonObj = {
-    //                 "id" : getStationId($(this)),
-    //                 "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
-    //                 "lastModified" : values[1] + yearNow,
-    //                 "ninetyFive" : values[2].replace("*", ""),
-    //                 "ninetyEight" : values[3].replace("*", ""),
-    //                 "diesel" : values[4],
-    //                 "lat" : "-",
-    //                 "lon" : "-"
-    //             };
-    //             prices.push(jsonObj);
-    //         }
-    //     });
-    //     return { stations : prices };
-    // }
     
     getGasStationsForLocation(body: string): Stations {
         const $: CheerioStatic = cheerio.load(body);
