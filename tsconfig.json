@@ -8,6 +8,7 @@
       "target": "es6",
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
+      "allowJs": true,
       "noImplicitAny": false,
       "module": "commonjs",         
       "types": [
@@ -18,4 +19,4 @@
           "node_modules/@types"
       ]
     }
-  }
+}

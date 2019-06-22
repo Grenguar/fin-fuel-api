@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import * as request from 'request-promise';
 
-export class Utils {
+export class Parser {
 
     url: string;
 
@@ -9,10 +9,10 @@ export class Utils {
         this.url = url;
     }
 
-    static getCityNames(body: string): CityLocations {
+    getCityNames(body: string): CityLocations {
         let citiesList = [];
         const regExpString: RegExp = /[\w-]*Valitse[\w-]*/g;
-        const $: CheerioStatic = cheerio.load(body)
+        const $: CheerioStatic = cheerio.load(body);
         $('select').find('option').map(function() {
             let cityName: string = <string>$(this).val();
             if (!cityName.match(regExpString)) {
@@ -23,13 +23,43 @@ export class Utils {
         return cityLocations;
     }
 
-    static getStationId(tableRow: Cheerio): string {
+    getStationId(tableRow: Cheerio): string {
         let coordSite = tableRow.find('> td > a').attr('href');
         return typeof coordSite == "undefined" ? "-" : coordSite.split("id=")[1];
     }
+
+    // function getGasStationsForLocation(body) {
+    //     $ = cheerio.load(body);
+    //     let prices = [];
+    //     const priceTable = $('#Hinnat').find('.e10');
+    //     const rows = priceTable.find('> tbody > tr');
+    //     const regExpString = /[\w-]*E10[\w-]*/g;
+    //     const yearNow = new Date().getFullYear();
+    //     rows.each(function() {
+    //         if ($(this).attr('class').match(regExpString)) {
+    //             let values = [];
+    //             $(this).find('td').each (function() {
+    //                 values.push($(this).text())
+    //             });
+    //             let jsonObj = {
+    //                 "id" : getStationId($(this)),
+    //                 "station" : values[0].replace(/\(.*\)/g, '').replace(/\u00B7/g, '').trim(),
+    //                 "lastModified" : values[1] + yearNow,
+    //                 "ninetyFive" : values[2].replace("*", ""),
+    //                 "ninetyEight" : values[3].replace("*", ""),
+    //                 "diesel" : values[4],
+    //                 "lat" : "-",
+    //                 "lon" : "-"
+    //             };
+    //             prices.push(jsonObj);
+    //         }
+    //     });
+    //     return { stations : prices };
+    // }
     
-    static getGasStationsForLocation(body: string): Stations {
-        const $: CheerioStatic = cheerio.load(body)
+    getGasStationsForLocation(body: string): Stations {
+        const $: CheerioStatic = cheerio.load(body);
+        console.log($.html())
         let prices = [];
         const priceTable: Cheerio = $('#Hinnat').find('.e10');
         const rows: Cheerio = priceTable.find('> tbody > tr');
@@ -58,9 +88,6 @@ export class Utils {
         let stations: Stations = { stations: prices}
         return stations;
     }
-
-
-
 }
 
 export interface CityLocations {

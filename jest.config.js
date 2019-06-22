@@ -1,9 +1,6 @@
 // jest.config.js
 module.exports = {
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
-  // transform: {
-  //   "^.+\\.(ts|tsx)$": "<rootDir>/preprocessor.js"
-  // },
   "roots": [
     "<rootDir>/src"
   ],
