@@ -30,14 +30,14 @@ export class Parser {
     
     getGasStationsForLocation(body: string): Stations {
         const $: CheerioStatic = cheerio.load(body);
-        console.log($.html())
         let prices = [];
         const priceTable: Cheerio = $('#Hinnat').find('.e10');
         const rows: Cheerio = priceTable.find('> tbody > tr');
         const regExpString: RegExp = /[\w-]*E10[\w-]*/g;
         const yearNow: number = new Date().getFullYear();
-        rows.each((() => {
-            if ($(this).attr('class').match(regExpString)) {
+        rows.each(() => {
+            // if ($(this).attr('class').match(regExpString)) {
+            if ($(this).hasClass('E10')) {
                 let values: string[] = [];
                 $(this).find('td').each (function() {
                     values.push($(this).text())
@@ -55,8 +55,9 @@ export class Parser {
                 }
                 prices.push(gasPrice);
             }
-        }));
+        });
         let stations: Stations = { stations: prices}
+        console.log(stations)
         return stations;
     }
 }

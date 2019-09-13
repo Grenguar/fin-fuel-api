@@ -16,9 +16,9 @@ if (Parser) {
             exp(cityNames.locations).toHaveLength(14)
         })
 
-        test('get Gas Stations For Location', () => {
-            let parser: Parser = new Parser(url);
-            let stations: Stations = parser.getGasStationsForLocation(testHtmlLocationTable)
-        })
+        // test('get Gas Stations For Location', () => {
+        //     let parser: Parser = new Parser(url);
+        //     let stations: Stations = parser.getGasStationsForLocation(testHtmlLocationTable)
+        // })
     })
 }
